@@ -1,0 +1,38 @@
+fn ln(n : f32) : f32 {
+    result = 0.0
+    term = n - 1.0
+
+    x = 1.0
+    while x < 100.0 {
+        result = result + term / x
+        term = term * -(x - 1.0)
+    }
+
+    return result
+}
+
+fn log2(n : f32, exp : f32) : f32 {
+    if n < 1.0 {
+        return exp - 1.0
+    }
+    return log2(n / 2.0, exp + 1.0)
+}
+
+fn abs(n : f32) : f32 {
+    if n < 0.0 {
+        return -n
+    }
+}
+
+fn mandelbrot(c : f32, maxIter : f32) : f32 {
+    z: f32 = 0.0
+    c: f32 = 0.0
+    while abs(z) <= 2.0 & n < max_iter {
+        z = z * z + c
+        n += 1.0
+    }
+    if n == max_iter {
+        return max_iter
+    }
+    return n + 1 - ln(log2(abs(z)))
+}

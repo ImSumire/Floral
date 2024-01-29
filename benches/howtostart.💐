@@ -1,0 +1,33 @@
+/* Theorical Preview */
+
+// Functions
+fn fact(n : u32) : u32 {
+    if n <= 1 {
+        return 1
+    }
+    return n * fact(n - 1)
+}
+
+// Main function
+fn main() : u32 {
+    index: i32 = 0
+    // ratio: f32 = 3.0 / 4.0
+
+    i: int = 0
+    while i < 10 {
+        print("while\n")
+        i = i + 1
+    }
+
+    j: int = 0
+    until j == 10 {
+        print("until\n")
+        j = j + 1
+    }
+
+    // b: i32 = 0b0101110110
+
+    dt: f32 = 0
+    print("hi !\n")
+    return fact(10)
+}
