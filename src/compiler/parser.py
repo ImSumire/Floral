@@ -1,7 +1,7 @@
 import re
 import sly
 
-from src.compiler.lexer import Lexer
+from src.compiler import Lexer
 
 
 class Parser(sly.Parser):
@@ -38,11 +38,13 @@ class Parser(sly.Parser):
 
     ### Variable
 
+    # Explicitly typed
     @_("NAME COLON NAME EQ expr")
     def statement(self, p):
         ty = p.NAME1
         return "VarAssign", {"name": p.NAME0, "value": p.expr}
 
+    # Implicitly typed
     @_("NAME EQ expr")
     def statement(self, p):
         return "VarAssign", {"name": p.NAME, "value": p.expr}
@@ -151,19 +153,19 @@ class Parser(sly.Parser):
 
     @_("INT")
     def expr(self, p):
-        return "Number", {"value": int(p.INT)}
+        return "Int", {"value": p.INT}
 
     @_("MINUS INT")
     def expr(self, p):
-        return "Number", {"value": -int(p.INT)}
+        return "Int", {"value": "-" + p.INT}
 
     @_("FLOAT")
     def expr(self, p):
-        return "Float", {"value": float(p.FLOAT)}
+        return "Float", {"value": p.FLOAT}
 
     @_("MINUS FLOAT")
     def expr(self, p):
-        return "Float", {"value": -float(p.FLOAT)}
+        return "Float", {"value": "-" + p.FLOAT}
 
     @_("STR")
     def expr(self, p):

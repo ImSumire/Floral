@@ -2,33 +2,22 @@ import re
 import sly
 
 
-def rGroup(*regexes):
-    return "(" + "|".join(regexes) + ")"
-
-
-def rAny(*regexes):
-    return rGroup(*regexes) + "*"
-
-
-# https://regex-generator.olafneumann.org/
-# https://regexr.com/
-# Exp = r"[+-]?\d(?:_*?\d)*(?:\.\d+)?[eE](?:[+-]?\d(?:_*?\d)*)"
+# Useful tools :
+# - https://regex-generator.olafneumann.org/
+# - https://regexr.com/
 
 # Int
 rBin = r"0[bB](?:_*?[01])+"
 rOct = r"0[oO](?:_*?[0-7])+"
 rDec = r"\d(?:_*?\d)*"
 rHex = r"0[xX](?:_*?[0-9a-fA-F])+"
-# \d(?:_*?\d)*([uif\d])?
+intSuffix = r"(?:([ui]\d{1,2})*)"
 
-rInt = f"({rBin}|{rOct}|{rDec}|{rHex})"
+rInt = f"({rBin}|{rOct}|{rDec}|{rHex}){intSuffix}"
 
 # Float
-rFlt = rDec + r"\." + rDec
-
-# rf16 = rFlt + r"f16"
-# rf32 = rFlt + r"f32"
-# rf64 = rGroup(rFlt + r"f64", rFlt + r" ")
+floatSuffix = r"(?:(f\d{1,2})*)"
+rFlt = r"\d(?:_*?\d)*\.\d(?:_*?\d)*" + floatSuffix
 
 
 class Lexer(sly.Lexer):
@@ -36,16 +25,9 @@ class Lexer(sly.Lexer):
     tokens = {
         NAME,
 
-        # Int
-        # I8, I16, I32, I64,
-        # U8, U16, U32, U64,
-        INT,
-
-        # Float
-        # F16, F32, F64,
+        # Types
         FLOAT,
-
-        # String
+        INT,
         STR,
 
         # Operators
@@ -66,7 +48,7 @@ class Lexer(sly.Lexer):
 
     ignore = " \t\r"
 
-    literals = {",", ";"}
+    # literals = {",", ";"}
 
     @_(r"\n")
     def newline(self, t):
@@ -82,21 +64,8 @@ class Lexer(sly.Lexer):
     NAME["return"] = RETURN
     NAME["continue"] = CONTINUE
 
-    # I8 = ri8
-    # U8 = ru8
-    # I16 = ri16
-    # U16 = ru16
-    # I32 = ri32
-    # U32 = ru32
-    # I64 = ri64
-    # U64 = ru64
-    INT = rInt
-
-    # F16 = rf16
-    # F32 = rf32
-    # F64 = rf64
     FLOAT = rFlt
-
+    INT = rInt
     STR = r"(\".*?\")|(\'.*?\')"
 
     DIV = r"(?<!\/)\/(?!\/)"

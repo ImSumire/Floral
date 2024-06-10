@@ -1,9 +1,7 @@
 # https://docs.python.org/3/library/ctypes.html
 # https://llvmlite.readthedocs.io/en/latest/user-guide/ir/types.html
 
-from src.compiler.lexer import Lexer
-from src.compiler.parser import Parser
-
+import re
 from llvmlite.ir import (
     # Bases
     Module,
@@ -19,6 +17,8 @@ from llvmlite.ir import (
     ArrayType,
     FunctionType,
 )
+
+from src.compiler import Lexer, Parser
 
 
 class Compiler:
@@ -157,16 +157,49 @@ class Compiler:
             with self.builder.if_then(test):
                 self.compile(body)
 
+    def parseInt(self, value):
+        suffix = r"(?:([ui]\d{1,2})*)"
+        default = "i32"
+
+        if (match := re.match(r'(0[bB](?:_*?[01])+)' + suffix, value)):
+            _val, ty = match.groups()
+            val = int(_val[2:], 2)
+        
+        elif (match := re.match(r'(0[oO](?:_*?[0-7])+)' + suffix, value)):
+            _val, ty = match.groups()
+            val = int(_val[2:], 8)
+        
+        elif (match := re.match(r'(0[xX](?:_*?[0-9a-fA-F])+)' + suffix, value)):
+            _val, ty = match.groups()
+            val = int(_val[:2], 16)
+
+        elif (match := re.match(r'(-?\d(?:_*?\d)*)' + suffix, value)):
+            _val, ty = match.groups()
+            val = int(_val)
+
+        return val, self.types[ty if ty else default]
+
+    def parseFloat(self, value):
+        suffix = r"(?:(f\d{1,2})*)"
+        default = "f32"
+
+        if (match := re.match(r'(\d(?:_*?\d)*\.\d(?:_*?\d)*)' + suffix, value)):
+            _val, ty = match.groups()
+            val = float(_val)
+        
+        return val, self.types[ty if ty else default]
+
     def visitValue(self, branch):
         category = branch[0]
 
         match category:
-            case "Number":
-                val, ty = branch[1]["value"], self.types["int"]
+            case "Int":
+                val, ty = self.parseInt(branch[1]["value"])
                 return Constant(ty, val), ty
 
             case "Float":
-                val, ty = branch[1]["value"], self.types["float"]
+                val, ty = self.parseFloat(branch[1]["value"])
+                # val, ty = branch[1]["value"], self.types["float"]
                 return Constant(ty, val), ty
 
             case "Name":
