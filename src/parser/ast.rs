@@ -10,6 +10,9 @@ pub enum Expr {
     FunctionCall {
         name: String,
         args: Vec<Expr>
+    },
+    Scope {
+        body: Vec<Statement>
     }
 }
 
@@ -37,7 +40,7 @@ pub enum Statement {
         name: String,
         r#type: String,
         parameters: Vec<Param>,
-        body: Vec<Statement>
+        body: Expr  // Expr::Scope
     },
     Expression(Expr),
     Return(Expr)

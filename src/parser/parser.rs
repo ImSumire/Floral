@@ -114,6 +114,7 @@ impl Parser {
     }
 
     fn parse_primary(&mut self) -> Option<Expr> {
+        // Literal
         if let Some(literal) = self.parse_literal() {
             return Some(literal)
         }
@@ -147,6 +148,30 @@ impl Parser {
             return Some(identifier);
         }
 
+        if let Some(scope) = self.parse_scope() {
+            return Some(scope);
+        }
+
+        None
+    }
+
+    fn parse_scope(&mut self) -> Option<Expr> {
+        if self.match_kind(TokenKind::Punctuation) && self.peek_value() == Some("{") {
+            self.advance();  // Consume '{'
+
+            let mut body = Vec::new();
+            while self.peek_kind() != Some(&TokenKind::Punctuation) || self.peek_value() != Some("}") {
+                if let Some(statement) = self.parse_statement() {
+                    body.push(statement);
+                } else {
+                    return None;
+                }
+            }
+
+            self.advance();  // Consume '}'
+            return Some(Expr::Scope { body });
+        }
+
         None
     }
 
@@ -177,7 +202,7 @@ impl Parser {
 
         // Fn
         if self.match_kind(TokenKind::Keyword) && self.peek_value() == Some("fn") {
-            self.advance();
+            self.advance();  // Comsume 'fn'
 
             let name = self.parse_identifier()?;
             let name = if let Expr::Identifier(name) = name {
@@ -187,13 +212,13 @@ impl Parser {
             };
 
             // self.match_kind(TokenKind::Punctuation);  // Expect '('
-            self.advance();
+            self.advance();  // Consume '('
 
             let mut parameters = Vec::new();
             while self.peek_kind() != Some(&TokenKind::Punctuation) || self.peek_value() != Some(")") {
                 if !parameters.is_empty() {
                     // self.match_kind(TokenKind::Punctuation);  // Skip comma
-                    self.advance();
+                    self.advance();  // Consume ','
                 }
                 
                 let name = self.parse_identifier()?;
@@ -204,7 +229,7 @@ impl Parser {
                 };
 
                 // self.match_kind(TokenKind::Punctuation);  // Consume ':'
-                self.advance();
+                self.advance();  // Consume ':'
                 
                 let r#type = self.parse_identifier()?;
                 let r#type = if let Expr::Identifier(r#type) = r#type {
@@ -228,21 +253,18 @@ impl Parser {
             } else {
                 return None;
             };
-            // self.advance();
 
-            // self.match_kind(TokenKind::Punctuation);  // Expect '{'
-            self.advance();
-
-            let mut body = Vec::new();
-            while self.peek_kind() != Some(&TokenKind::Punctuation) || self.peek_value() != Some("}") {
-                if let Some(statement) = self.parse_statement() {
-                    body.push(statement);
-                }
+            // Parse the function body as a scope
+            if let Some(body) = self.parse_scope() {
+                return Some(Statement::Function {
+                    name,
+                    r#type,
+                    parameters,
+                    body,
+                });
+            } else {
+                return None; // Failed to parse the function body
             }
-            // self.match_kind(TokenKind::Punctuation);  // Consume '}'
-            self.advance();
-
-            return Some(Statement::Function { name, r#type, parameters, body });
         }
 
         if self.match_kind(TokenKind::Keyword) && self.peek_value() == Some("return") {
