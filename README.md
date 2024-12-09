@@ -11,4 +11,6 @@
 
 Floral brings the best of both worlds: simplicity and safety, with the performance and control typically found in low-level languages like C and Rust. It is the ideal choice for developers who want to write clean, safe, and efficient code without the overhead of garbage collection.
 
+---
+
 ![I love Rust](docs/i_love_rust.png)
