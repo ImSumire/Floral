@@ -1,0 +1,14 @@
+// Characters
+let a = 'a'
+let newline = '\n'
+let greets = "Hello, World!"
+
+// Numbers
+let n = 42
+
+let b = 0b01010010101
+let o = 0o5127463
+let x = 0xd83b42c569ae71f
+
+let pi = 3.14
+let one = 1.

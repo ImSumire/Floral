@@ -1,0 +1,8 @@
+/*
+    Floral Example - All syntax usage
+    Used for lexer test cases
+*/
+
+fn greet(name: String): String {
+    return fmt("Hello, {name}!")  // Greet a friend!
+}
